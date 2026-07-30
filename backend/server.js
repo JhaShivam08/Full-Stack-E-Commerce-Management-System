@@ -1,26 +1,29 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-
 require("dotenv").config();
 
 const Product = require("./models/Product");
-
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+// ================= MONGODB CONNECTION =================
+
 mongoose
-  .connect("mongodb://127.0.0.1:27017/ecommerce")
+  .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB Connected");
   })
   .catch((err) => {
-    console.log(err);
+    console.log("❌ MongoDB Error:", err);
   });
+
 const PORT = process.env.PORT || 5000;
+
+// ================= HOME =================
 
 app.get("/", (req, res) => {
   res.send("Welcome to E-Commerce Backend");
@@ -30,7 +33,7 @@ app.get("/", (req, res) => {
 
 app.get("/products", async (req, res) => {
   try {
-    const products = await Product.find().sort({ id: 1 });
+    const products = await Product.find({});
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
