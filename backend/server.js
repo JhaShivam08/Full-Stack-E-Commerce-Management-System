@@ -18,7 +18,7 @@ mongoose
     console.log("✅ MongoDB Connected");
   })
   .catch((err) => {
-    console.log("❌ MongoDB Error:", err);
+    console.error("❌ MongoDB Connection Error:", err);
   });
 
 const PORT = process.env.PORT || 5000;
@@ -33,10 +33,10 @@ app.get("/", (req, res) => {
 
 app.get("/products", async (req, res) => {
   try {
-    const products = await Product.find({});
+    const products = await Product.find();
     res.json(products);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -55,9 +55,9 @@ app.get("/products/:id", async (req, res) => {
     }
 
     res.json(product);
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({
-      message: error.message,
+      message: err.message,
     });
   }
 });
@@ -71,9 +71,9 @@ app.get("/products/category/:category", async (req, res) => {
     });
 
     res.json(products);
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({
-      message: error.message,
+      message: err.message,
     });
   }
 });
@@ -90,9 +90,9 @@ app.post("/products", async (req, res) => {
       message: "Product Added Successfully",
       product,
     });
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({
-      message: error.message,
+      message: err.message,
     });
   }
 });
@@ -117,9 +117,9 @@ app.put("/products/:id", async (req, res) => {
       message: "Product Updated Successfully",
       product,
     });
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({
-      message: error.message,
+      message: err.message,
     });
   }
 });
@@ -141,9 +141,9 @@ app.delete("/products/:id", async (req, res) => {
     res.json({
       message: "Product Deleted Successfully",
     });
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({
-      message: error.message,
+      message: err.message,
     });
   }
 });

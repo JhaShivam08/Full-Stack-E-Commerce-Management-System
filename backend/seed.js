@@ -1,12 +1,14 @@
 const mongoose = require("mongoose");
+require("dotenv").config();
+
 const Product = require("./models/Product");
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/ecommerce")
+  .connect(process.env.MONGO_URI)
   .then(async () => {
-    console.log("MongoDB Connected");
+    console.log("✅ MongoDB Connected");
 
-    await Product.deleteMany();
+    await Product.deleteMany({});
 
     await Product.insertMany([
       {
@@ -57,6 +59,9 @@ mongoose
     ]);
 
     console.log("✅ Products Inserted Successfully");
-    process.exit();
+    process.exit(0);
   })
-  .catch((err) => console.log(err));
+  .catch((err) => {
+    console.log("❌ Error:", err);
+    process.exit(1);
+  });

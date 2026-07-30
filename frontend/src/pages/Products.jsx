@@ -1,9 +1,45 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
+
+const initialProducts = [
+  {
+    id: 1,
+    name: "iPhone 16 Pro",
+    category: "Phones",
+    price: 129999,
+    image: "",
+  },
+  {
+    id: 2,
+    name: "Samsung Galaxy S25 Ultra",
+    category: "Phones",
+    price: 119999,
+    image: "",
+  },
+  {
+    id: 3,
+    name: "HP Victus Laptop",
+    category: "Laptops",
+    price: 79999,
+    image: "",
+  },
+  {
+    id: 4,
+    name: "Boat Rockerz 550",
+    category: "Audio",
+    price: 1499,
+    image: "",
+  },
+  {
+    id: 5,
+    name: "Nike Air Max",
+    category: "Footwear",
+    price: 7999,
+    image: "",
+  },
+];
 
 function Products() {
-  const [products, setProducts] = useState([]);
-
+  const [products, setProducts] = useState(initialProducts);
   const [formData, setFormData] = useState({
     id: "",
     name: "",
@@ -11,21 +47,7 @@ function Products() {
     price: "",
     image: "",
   });
-
   const [search, setSearch] = useState("");
-
-  useEffect(() => {
-    getProducts();
-  }, []);
-
-  const getProducts = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/products");
-      setProducts(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   const handleChange = (e) => {
     setFormData({
@@ -34,62 +56,71 @@ function Products() {
     });
   };
 
-  const addProduct = async () => {
-    try {
-      await axios.post("http://localhost:5000/products", {
-        ...formData,
-        id: Number(formData.id),
-        price: Number(formData.price),
-      });
+  const addProduct = () => {
+    const trimmedName = formData.name.trim();
+    const trimmedCategory = formData.category.trim();
+    const trimmedImage = formData.image.trim();
+    const priceValue = Number(formData.price);
 
-      getProducts();
-
-      setFormData({
-        id: "",
-        name: "",
-        category: "",
-        price: "",
-        image: "",
-      });
-    } catch (err) {
-      alert("Unable to add product");
-      console.log(err);
+    if (!trimmedName || !trimmedCategory || Number.isNaN(priceValue)) {
+      alert("Please fill in name, category, and a valid price");
+      return;
     }
+
+    const enteredId = Number(formData.id);
+    const newProduct = {
+      id:
+        Number.isInteger(enteredId) && enteredId > 0
+          ? enteredId
+          : products.length + 1,
+      name: trimmedName,
+      category: trimmedCategory,
+      price: priceValue,
+      image: trimmedImage,
+    };
+
+    setProducts((prev) => [...prev, newProduct]);
+
+    setFormData({
+      id: "",
+      name: "",
+      category: "",
+      price: "",
+      image: "",
+    });
   };
 
-  const updateProduct = async () => {
-    try {
-      await axios.put(
-        `http://localhost:5000/products/${formData.id}`,
-        {
-          name: formData.name,
-          category: formData.category,
-          price: Number(formData.price),
-          image: formData.image,
-        }
-      );
+  const updateProduct = () => {
+    const idValue = Number(formData.id);
 
-      getProducts();
-
-      setFormData({
-        id: "",
-        name: "",
-        category: "",
-        price: "",
-        image: "",
-      });
-    } catch (err) {
-      console.log(err);
+    if (!Number.isInteger(idValue) || idValue <= 0) {
+      alert("Please select a valid product ID to update");
+      return;
     }
+
+    const updatedProduct = {
+      id: idValue,
+      name: formData.name.trim(),
+      category: formData.category.trim(),
+      price: Number(formData.price),
+      image: formData.image.trim(),
+    };
+
+    setProducts((prev) =>
+      prev.map((product) => (product.id === idValue ? updatedProduct : product))
+    );
+
+    setFormData({
+      id: "",
+      name: "",
+      category: "",
+      price: "",
+      image: "",
+    });
   };
 
-  const deleteProduct = async (id) => {
-    try {
-      await axios.delete(`http://localhost:5000/products/${id}`);
-      getProducts();
-    } catch (err) {
-      console.log(err);
-    }
+  const deleteProduct = (id) => {
+    setProducts((prev) => prev.filter((product) => product.id !== id));
   };
 
   const filteredProducts = products.filter((item) =>
@@ -98,13 +129,9 @@ function Products() {
 
   return (
     <div className="products-container">
-
-      <h1 className="product-title">
-        Product Management
-      </h1>
+      <h1 className="product-title">Product Management</h1>
 
       <div className="product-form">
-
         <input
           type="number"
           placeholder="ID"
@@ -146,46 +173,28 @@ function Products() {
         />
 
         <div className="button-group">
-
-          <button
-            className="add-btn"
-            onClick={addProduct}
-          >
+          <button className="add-btn" onClick={addProduct}>
             Add Product
           </button>
 
-          <button
-            className="update-btn"
-            onClick={updateProduct}
-          >
+          <button className="update-btn" onClick={updateProduct}>
             Update Product
           </button>
-
         </div>
-
       </div>
 
       <div className="search-box">
-
         <input
           type="text"
           placeholder="Search products..."
           value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
+          onChange={(e) => setSearch(e.target.value)}
         />
-
       </div>
 
       <div className="product-grid">
-                {filteredProducts.map((product) => (
-
-          <div
-            className="product-card"
-            key={product.id}
-          >
-
+        {filteredProducts.map((product) => (
+          <div className="product-card" key={product.id}>
             <img
               src={
                 product.image && product.image.trim() !== ""
@@ -196,23 +205,15 @@ function Products() {
             />
 
             <div className="product-info">
-
               <h2>{product.name}</h2>
 
-              <span className="category">
-                {product.category}
-              </span>
+              <span className="category">{product.category}</span>
 
-              <h3>
-                ₹{product.price}
-              </h3>
+              <h3>₹{product.price}</h3>
 
-              <p className="rating">
-                ⭐⭐⭐⭐⭐
-              </p>
+              <p className="rating">⭐⭐⭐⭐⭐</p>
 
               <div className="card-buttons">
-
                 <button
                   className="edit-btn"
                   onClick={() =>
@@ -230,23 +231,15 @@ function Products() {
 
                 <button
                   className="delete-btn"
-                  onClick={() =>
-                    deleteProduct(product.id)
-                  }
+                  onClick={() => deleteProduct(product.id)}
                 >
                   Delete
                 </button>
-
               </div>
-
             </div>
-
           </div>
-
         ))}
-
       </div>
-
     </div>
   );
 }
